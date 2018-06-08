@@ -51,6 +51,7 @@
     - libimages1.smb.credentials
     - maplab.smb.credentials
     - geoserver.smb.credentials
+    - archives_bd.smb.credentials
 - name: Create mount to plum binaries
   mount:
     name: '/mnt/diglibdata/hydra_binaries'
@@ -83,6 +84,7 @@
     - pudl
     - archives
     - maplab
+    - archives_bd
 - name: Create mount to studio (hydra sources)
   mount:
     name: /mnt/hydra_sources/studio
