@@ -1,5 +1,6 @@
 ---
 postgres_host: 'lib-postgres3.princeton.edu'
+postgresql_is_local: false
 postgres_version: 10
 passenger_server_name: "figgy.princeton.edu"
 passenger_app_root: "/opt/figgy/current/public"
