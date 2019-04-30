@@ -20,7 +20,6 @@
     - role: roles/pulibrary.oracle.java8
     - role: roles/pulibrary.extra_path
     - role: roles/pulibrary.rails-app
-    - { role: roles/pulibrary.solr, when: postgresql_is_local == true }
     - role: roles/pulibrary.cantaloupe
     - role: roles/pulibrary.rabbitmq
     - role: roles/pulibrary.sidekiq_worker
