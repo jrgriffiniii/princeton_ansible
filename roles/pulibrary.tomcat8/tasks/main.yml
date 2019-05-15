@@ -12,7 +12,7 @@
     mode: 0640
 
 - name: ensure tomcat8 starts on boot
-  systemd:
+  service:
     name: tomcat8
     state: started
     enabled: true
