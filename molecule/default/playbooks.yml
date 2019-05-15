@@ -22,3 +22,5 @@
     - role: pulibrary.elastic
     - role: pulibrary.nginxplus
     - role: pulibrary.rails-app
+    - role: pulibrary.openjdk8
+    - role: pulibrary.tomcat8
