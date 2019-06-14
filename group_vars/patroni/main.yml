@@ -1,0 +1,3 @@
+---
+replicant_patroni_password: "{{ vault_replicant_patroni_password }}"
+postgressu_password: "{{ vault_postgressu_password }}"
