@@ -1,8 +1,44 @@
 ---
+- name: Change owner to lib/www so deploy has access
+  file:
+    path: "/var/www"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+
+- name: Allow deploy to restart apache2
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: "present"
+    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: service apache2 restart"
+    validate: "visudo -cf %s"
+
+
+- name: Allow deploy user to chownership of the library directory to www-data
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: "present"
+    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: /bin/chown -R www-data /var/www/library_cap"
+    validate: "visudo -cf %s"
+
+- name: Allow deploy user to chownership of the library directory to deploy
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: "present"
+    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: /bin/chown -R deploy /var/www/library_cap"
+    validate: "visudo -cf %s"
+
+- name: Install php7.2 requirements for libwww
+  apt:
+    name: ["php7.2-pdo"]
+    state: present
+    update_cache: true
+
 - name: Install gulp globally
   command: npm install --global gulp-cli
   become: true
   changed_when: false
+
 
   # needed for capistrano to have access to this file
 - name: Check to see if .env.local file exists.
@@ -62,17 +98,23 @@
     group: "{{ deploy_user }}"
   when: not settings_php_home_exists.stat.exists or force_settings
 
-- name: Change owner to lib/www so deploy has access
-  file:
-    path: "/var/www"
-    state: directory
-    owner: "{{ deploy_user }}"
-    group: "{{ deploy_user }}"
 
+
+# TODO: These commands should just be mysql commands, not drush commands and run from th
+# deploy user's home directory
+# For the moment you need to run the deploy with the sql commented out
+# Then run cap (it will fail, but put settings in place), then run this with sql file
+# then run cap again.
+# 
+# Something like this instead
+# mysql_db:
+#   state: import
+#   name: all
+#   target: /tmp/{{ inventory_hostname }}.sql
 - name: Copy database dump
   copy:
     src: 'files/{{ drupal_dbimport_file }}'
-    dest: '{{ drupal_docroot }}/{{ drupal_dbimport_file }}'
+    dest: '/home/deploy/{{ drupal_dbimport_file }}'
     owner: '{{ deploy_user }}'
     group: '{{ deploy_user }}'
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
@@ -80,13 +122,13 @@
 - name: Import database from local dump file
   command: drush sql-cli < {{ drupal_dbimport_file }}
   args:
-    chdir: "{{ drupal_docroot }}"
+    chdir: "{{ apache_app_path }}"
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
 
 - name: Install drupal variable update file
   template:
     src: "update.sql.j2"
-    dest: "{{ drupal_docroot }}/update.sql"
+    dest: "{{ apache_app_path }}/update.sql"
     owner: "{{ systems_user }}"
     group: "{{ systems_user }}"
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
@@ -94,33 +136,27 @@
 - name: Setup the solr connection
   command: drush sql-cli < update.sql
   args:
-    chdir: "{{ drupal_docroot }}"
+    chdir: "{{ apache_app_path }}"
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
 
 - name: Clear the solr index
   command: drush search-api-clear
   args:
-    chdir: "{{ drupal_docroot }}"
+    chdir: "{{ apache_app_path }}"
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
 
 - name: Update the solr index
   command: drush search-api-index
   args:
-    chdir: "{{ drupal_docroot }}"
+    chdir: "{{ apache_app_path }}"
   when: (drupal_dbimport_file is defined) and (inventory_hostname ==  groups[group_names[0]][0])
+## end of database
 
 - name: Install smtp module
   command: drush -y en --resolve-dependencies smtp
   args:
-    chdir: "{{ drupal_docroot }}"
+    chdir: "{{ apache_app_path }}"
   when: drupal_dbimport_file is defined
-
-- name: Allow deploy user to chownership of the library directory
-  lineinfile:
-    dest: "/etc/sudoers"
-    state: "present"
-    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: /bin/chown -R www-data /var/www/library_cap"
-    validate: "visudo -cf %s"
 
 - name: disable apache php7.0 module
   apache2_module:
