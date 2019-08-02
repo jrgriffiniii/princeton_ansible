@@ -17,7 +17,7 @@
   tags:
     - mnt
 
-## Mount the share
+## Mount the share - comment this out for solrcloud_staging
 - name: Create mount to the Solr backup
   mount:
     name: '/mnt/solrbackup'
