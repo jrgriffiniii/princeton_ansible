@@ -8,16 +8,10 @@
        - checkout
        - setup_remote_docker
        - run:
-           name: Retrieve all of the roles
-           command: |
-             PULIBRARY_ROLES=$( `find . -type d -regex '.*/roles/pulibrary.*/molecule/.*' | awk 'BEGIN { FS="/"; } { print $3 }' | uniq` )
-             CURRENT_PULIBRARY_ROLE=1
-             CURRENT_PULIBRARY_ROLES=${PULIBRARY_ROLES[@]:$CURRENT_PULIBRARY_ROLE:2}
-       - run:
            name: Run molecule test for an Ansible role
            command: |
-             for PULIBRARY_ROLE in $CURRENT_PULIBRARY_ROLES
-               do
+             for $PULIBRARY_ROLE in `find . -type d -regex '.*/roles/pulibrary.*/molecule/.*' | awk 'BEGIN { FS="/"; } { print $3 }' | uniq`
+             do
                cd roles/$PULIBRARY_ROLE/
                molecule test
                cd ../..
