@@ -10,5 +10,8 @@ for molecule_path_value in glob.glob('./roles/pulibrary.*/molecule'):
     role_path = Path(*molecule_path.parts[:-1])
     role_paths.append(str(role_path))
 os.environ['PULIBRARY_ROLES'] = "\n".join(role_paths)
-
-os.system('echo circleci tests split --split-by=timings $PULIBRARY_ROLES')
+os.environ['TESTFILES'] = os.system('circleci tests split --split-by=timings $PULIBRARY_ROLES')
+for role in os.environ['TESTFILES']:
+    os.system(f'cd {role}')
+    os.system('molecule test')
+    os.system('cd ..')
