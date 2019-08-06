@@ -23,6 +23,7 @@ roles_pipe.stdout.close()
 test_files = str(completed_process.stdout)
 
 # Trying to split the tests
+
 test_results = []
 for role in test_files.split(' '):
     print(f'Executing the tests for {role}')
