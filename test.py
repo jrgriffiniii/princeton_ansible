@@ -20,15 +20,13 @@ roles_pipe = subprocess.Popen(echo_args, stdout=subprocess.PIPE)
 circleci_split_args = ['circleci', 'tests', 'split']
 completed_process = subprocess.run(circleci_split_args, capture_output=True, stdin=roles_pipe.stdout)
 roles_pipe.stdout.close()
-test_files = str(completed_process.stdout)
-
-# Trying to split the tests
+test_files = completed_process.stdout.decode('utf-8')
 
 test_results = []
 for role in test_files.split(' '):
     print(f'Executing the tests for {role}')
     os.system(f'cd ~/princeton_ansible/{role}')
-    test_process = subprocess.run(['molecule', 'test'], capture_output=True, stdout=subprocess.STDOUT, stderr=subprocess.STDERR)
+    test_process = subprocess.run(['molecule', 'test'], capture_output=True, stdout=subprocess.STDOUT)
     test_results.append(test_process.returncode)
 
 error_statuses = test_results.filter(lambda status: status != 0, test_results)
