@@ -27,7 +27,7 @@ test_results = []
 for role in test_files.split(' '):
     print(f'Executing the tests for {role}')
     os.system(f'cd ~/princeton_ansible/{role}')
-    test_process = subprocess.run(['molecule', 'test'], capture_output=True, stdout=subprocess.STDOUT, stderr=subprocess.STDOUT)
+    test_process = subprocess.run(['molecule', 'test'], capture_output=True, stdout=subprocess.STDOUT, stderr=subprocess.STDERR)
     test_results.append(test_process.returncode)
 
 error_statuses = test_results.filter(lambda status: status != 0, test_results)
