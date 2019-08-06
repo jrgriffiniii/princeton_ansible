@@ -10,12 +10,7 @@
        - run:
            name: Run molecule test for an Ansible role
            command: |
-             for $PULIBRARY_ROLE in `find . -type d -regex '.*/roles/pulibrary.*/molecule/.*' | awk 'BEGIN { FS="/"; } { print $3 }' | uniq`
-             do
-               cd roles/$PULIBRARY_ROLE/
-               molecule test
-               cd ../..
-             done
+             python ./test.py
 
  workflows:
    ci:
