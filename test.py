@@ -2,16 +2,33 @@
 
 import glob
 import os
+import subprocess
 from pathlib import Path
+import sys
+import pdb
 
 role_paths = []
 for molecule_path_value in glob.glob('./roles/pulibrary.*/molecule'):
     molecule_path = Path(molecule_path_value)
     role_path = Path(*molecule_path.parts[:-1])
     role_paths.append(str(role_path))
-os.environ['PULIBRARY_ROLES'] = "\n".join(role_paths)
-test_files = os.system('circleci tests split --split-by=timings $PULIBRARY_ROLES')
-print(test_files)
-for role in test_files:
+
+echo_args = ['echo']
+echo_args.extend(role_paths)
+roles_pipe = subprocess.Popen(echo_args, stdout=subprocess.PIPE)
+
+circleci_split_args = ['circleci', 'tests', 'split']
+completed_process = subprocess.run(circleci_split_args, capture_output=True, stdin=roles_pipe.stdout)
+roles_pipe.stdout.close()
+test_files = str(completed_process.stdout)
+
+test_results = []
+for role in test_files.split(' '):
+    print(f'Executing the tests for {role}')
     os.system(f'cd ~/princeton_ansible/{role}')
-    os.system('molecule test && cd ..')
+    test_process = subprocess.run(['molecule', 'test'], capture_output=True, stdout=subprocess.STDOUT, stderr=subprocess.STDOUT)
+    test_results.append(test_process.returncode)
+
+error_statuses = test_results.filter(lambda status: status != 0, test_results)
+if len(error_statuses) > 0:
+    sys.exit(1)
