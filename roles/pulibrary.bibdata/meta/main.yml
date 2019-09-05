@@ -20,6 +20,5 @@ dependencies:
   - pulibrary.redis
   - pulibrary.nodejs
   - pulibrary.rails-app
-  - pulibrary.oracle.client
   - pulibrary.sidekiq_worker
   - pulibrary.samba

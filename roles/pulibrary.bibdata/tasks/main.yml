@@ -13,4 +13,4 @@
 - include: local_mariadb.yml
   when: bibdata_db_host == 'localhost'
 
-- include: redis_overcommit_memory.yml
+  # - include: redis_overcommit_memory.yml
