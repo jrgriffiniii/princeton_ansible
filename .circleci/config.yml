@@ -103,3 +103,6 @@
        - test_role:
            name: "test_blacklight"
            role: "pulibrary.blacklight-app"
+       - test_role:
+           name: "test_cantaloupe"
+           role: "pulibrary.cantaloupe"
